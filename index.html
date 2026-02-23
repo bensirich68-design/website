@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VintageHub - Vintage Market Auction</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Space+Grotesk:wght@400;500;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            'display': ['Playfair Display', 'serif'],
+            'sans': ['Space Grotesk', 'sans-serif'],
+          },
+          colors: {
+            'cream': '#EBE5D9',
+            'ink': '#2B2620',
+            'rust': '#D04A3C',
+            'amber': '#D78B3F',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    :root {
+      --bg: #EBE5D9;
+      --fg: #2B2620;
+      --muted: #8B8579;
+      --accent: #D04A3C;
+      --accent-2: #D78B3F;
+      --card: #FFFFFF;
+      --border: #2B2620;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background-color: var(--bg);
+      color: var(--fg);
+    }
+
+    .font-display {
+      font-family: 'Playfair Display', serif;
+    }
+
+    .noise-bg {
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.15;
+      mix-blend-mode: multiply;
+      pointer-events: none;
+    }
+
+    .card-shadow {
+      box-shadow: 6px 6px 0px var(--border);
+    }
+
+    .card-shadow-lg {
+      box-shadow: 8px 8px 0px var(--border);
+    }
+
+    .btn-shadow {
+      box-shadow: 4px 4px 0px var(--border);
+    }
+
+    .btn-shadow:active {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px var(--border);
+    }
+
+    .notification-enter {
+      animation: slideIn 0.3s ease-out forwards;
+    }
+
+    .notification-exit {
+      animation: slideOut 0.3s ease-in forwards;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    @keyframes slideOut {
+      from {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      to {
+        opacity: 0;
+        transform: translateX(100%);
+      }
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .animate-pulse-glow {
+      animation: pulse-glow 1s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .animate-float {
+      animation: float 2s ease-in-out infinite;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+      height: 8px;
+      width: 8px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: var(--bg);
+      border-top: 2px solid var(--border);
+      border-bottom: 2px solid var(--border);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: var(--border);
+      border: 1px solid var(--bg);
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background-color: var(--accent);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    .transition-all-smooth {
+      transition: all 0.2s ease;
+    }
+
+    .vintage-filter {
+      filter: contrast(1.1) sepia(0.2);
+    }
+
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    input[type="number"]::-webkit-inner-spin-button,
+    input[type="number"]::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+
+    input[type="number"] {
+      -moz-appearance: textfield;
+    }
+
+    select {
+      background-image: none;
+    }
+
+    .terminal-text {
+      color: #33FF00;
+      font-family: 'Courier New', monospace;
+    }
+
+    .stagger-1 { animation-delay: 0.1s; }
+    .stagger-2 { animation-delay: 0.2s; }
+    .stagger-3 { animation-delay: 0.3s; }
+    .stagger-4 { animation-delay: 0.4s; }
+    .stagger-5 { animation-delay: 0.5s; }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in-up {
+      animation: fadeInUp 0.5s ease-out forwards;
+      opacity: 0;
+    }
+
+    .paper-texture {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23000000' fill-opacity='0.03' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+    }
+  </style>
+</head>
+<body class="min-h-screen selection:bg-rust selection:text-cream relative overflow-x-hidden">
+  <!-- Noise Texture Background -->
+  <div class="fixed inset-0 z-0 noise-bg" aria-hidden="true"></div>
+
+  <!-- Header -->
+  <header id="header" class="fixed top-0 left-0 right-0 z-50 bg-cream border-b-[3px] border-ink" style="box-shadow: 0 4px 0px rgba(43,38,32,1); display: none;">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center relative z-10">
+      <h1 class="text-2xl sm:text-3xl font-black font-display flex items-center gap-2 uppercase tracking-tighter">
+        <div class="bg-rust p-1.5 border-[3px] border-ink text-cream shadow-[3px_3px_0px_#2B2620] transform -rotate-3 hover:rotate-0 transition-transform cursor-pointer">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
+        </div>
+        Vintage<span class="text-rust italic">Hub</span>
+      </h1>
+      
+      <nav class="hidden md:flex gap-3 mr-2" id="header-nav"></nav>
+      
+      <div class="flex items-center gap-3" id="user-menu" style="display: none;">
+        <div class="flex flex-col text-right hidden sm:block">
+          <span class="text-sm font-black text-ink leading-none uppercase" id="user-display-name"></span>
+          <span class="text-[10px] font-bold text-rust mt-1 uppercase tracking-widest" id="user-display-role"></span>
+        </div>
+        <button 
+          onclick="handleLogout()"
+          class="p-2 bg-white border-[3px] border-ink text-ink hover:bg-rust hover:text-cream btn-shadow transition-all-smooth"
+          title="ออกจากระบบ"
+          aria-label="ออกจากระบบ"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Notifications Container -->
+  <div id="notifications-container" class="fixed bottom-6 right-6 z-[60] flex flex-col gap-3 pointer-events-none"></div>
+
+  <!-- Main Content Container -->
+  <main class="relative z-10 pt-8 px-4 max-w-6xl mx-auto">
+    
+    <!-- Registration Page -->
+    <section id="register-page" class="max-w-md mx-auto mt-10 mb-12">
+      <div class="bg-white border-[3px] border-ink p-8 sm:p-10 relative overflow-hidden card-shadow-lg">
+        <div class="absolute top-0 left-0 w-full h-2 opacity-30" style="background-image: url('https://www.transparenttextures.com/patterns/diagmonds-light.png');"></div>
+        
+        <div class="flex justify-center mb-6">
+          <div class="w-20 h-20 bg-ink flex items-center justify-center transform rotate-3 border-[3px] border-white" style="box-shadow: 4px 4px 0px #D04A3C;">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#EBE5D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+          </div>
+        </div>
+        
+        <div class="text-center mb-8 border-b-[3px] border-dashed border-ink pb-6">
+          <h2 class="text-4xl font-black text-ink mb-2 font-display uppercase tracking-tight">Auction Ticket</h2>
+          <p class="text-ink text-xs font-bold uppercase tracking-widest" id="ticket-number">No. 3847 — Admittance for One</p>
+        </div>
+        
+        <form id="register-form" class="space-y-6">
+          <div>
+            <label class="block text-xs font-black text-ink uppercase tracking-widest mb-2">Alias / ฉายาในวงการ</label>
+            <input 
+              type="text" 
+              required
+              autofocus
+              class="w-full bg-cream border-[3px] border-ink px-4 py-3 focus:bg-white focus:outline-none transition-colors text-lg font-bold text-ink btn-shadow"
+              placeholder="เช่น เซียนยีนส์, เฮียเสื้อวง"
+              id="register-name-input"
+            >
+          </div>
+          
+          <div>
+            <label class="block text-xs font-black text-ink uppercase tracking-widest mb-3">Role / เลือกบทบาท</label>
+            <div class="grid grid-cols-2 gap-4">
+              <button 
+                type="button"
+                onclick="setRegisterRole('BIDDER')"
+                class="p-4 border-[3px] flex flex-col items-center justify-center gap-2 transition-all-smooth font-bold uppercase register-role-btn"
+                data-role="BIDDER"
+                id="role-bidder"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" x2="21" y1="6" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+                <span class="text-xs tracking-wider">Collector</span>
+              </button>
+              <button 
+                type="button"
+                onclick="setRegisterRole('SELLER')"
+                class="p-4 border-[3px] flex flex-col items-center justify-center gap-2 transition-all-smooth font-bold uppercase register-role-btn"
+                data-role="SELLER"
+                id="role-seller"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
+                <span class="text-xs tracking-wider">Merchant</span>
+              </button>
+            </div>
+          </div>
+          
+          <div class="pt-6">
+            <button 
+              type="submit"
+              class="w-full bg-ink hover:bg-rust text-cream font-black uppercase tracking-widest py-4 border-[3px] border-ink transition-all-smooth flex items-center justify-center gap-2 text-lg"
+              style="box-shadow: 6px 6px 0px #2B2620;"
+            >
+              Enter Market
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" x2="19" y1="12" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Browse Page -->
+    <section id="browse-page" class="space-y-8 pb-12" style="display: none;">
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b-[3px] border-ink pb-6">
+        <div>
+          <h2 class="text-4xl md:text-5xl font-black text-ink font-display uppercase tracking-tighter">Vintage Market</h2>
+          <p class="text-ink font-bold mt-2 uppercase tracking-widest text-sm">Active Listings: <span id="listing-count">0</span> Items</p>
+        </div>
+        <div class="flex gap-3 overflow-x-auto pb-2 custom-scrollbar" id="category-filters"></div>
+      </div>
+      
+      <div id="auctions-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8"></div>
+      
+      <div id="no-items" class="bg-white border-[3px] border-ink p-12 flex flex-col items-center justify-center text-center card-shadow-lg" style="display: none;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-ink/20 mb-4"><path d="M20.38 3.46 16 2a4 4 0 0 1-8 0L3.62 3.46a2 2 0 0 0-1.34 2.23l.58 3.47a1 1 0 0 0 .99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 0 0 2-2V10h2.15a1 1 0 0 0 .99-.84l.58-3.47a2 2 0 0 0-1.34-2.23z"/></svg>
+        <h3 class="text-2xl font-black text-ink uppercase font-display mb-2">No Items Found</h3>
+        <p class="text-ink font-bold">Try another category or list an item yourself.</p>
+      </div>
+    </section>
+
+    <!-- Create Page -->
+    <section id="create-page" class="max-w-2xl mx-auto mb-12" style="display: none;">
+      <div class="bg-white border-[3px] border-ink p-8 sm:p-10 card-shadow-lg relative">
+        <div class="absolute top-4 right-4 opacity-10">
+          <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><path d="M8.12 8.12 12 12"/><path d="M20 4 8.12 15.88"/><circle cx="6" cy="18" r="3"/><path d="M14.8 14.8 20 20"/></svg>
+        </div>
+        
+        <div class="mb-8 border-b-[3px] border-ink pb-6 flex items-center gap-4 relative z-10">
+          <button 
+            onclick="navigateTo('BROWSE')"
+            class="w-12 h-12 bg-white border-[3px] border-ink btn-shadow transition-all-smooth flex items-center justify-center text-ink"
+            aria-label="กลับ"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="12" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+          </button>
+          <div>
+            <h2 class="text-3xl font-black text-ink uppercase font-display tracking-tight">List Item</h2>
+            <p class="text-ink text-sm mt-1 font-bold uppercase tracking-wider">Submit your vintage gear to the catalog</p>
+          </div>
+        </div>
+
+        <form id="create-form" class="space-y-6 relative z-10">
+          <!-- Image Upload Section -->
+          <div class="bg-cream p-4 border-[3px] border-ink">
+            <label class="block text-xs font-black text-ink uppercase tracking-widest mb-3">Item Image / รูปภาพสินค้า <span class="text-rust">*</span></label>
+            
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div class="relative w-full h-full min-h-[120px]">
+                <input 
+                  type="file" 
+                  accept="image/*"
+                  id="image-file-input"
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                >
+                <div class="w-full h-full bg-white border-[3px] border-dashed border-ink flex flex-col items-center justify-center text-ink group hover:bg-amber transition-colors p-4 text-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-2 group-hover:-translate-y-1 transition-transform"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" x2="12" y1="3" y2="15"/></svg>
+                  <span class="font-bold uppercase tracking-widest text-xs">คลิกอัพโหลดไฟล์จากเครื่อง</span>
+                </div>
+              </div>
+
+              <div class="flex flex-col justify-center">
+                <p class="text-center font-black text-ink text-xs uppercase mb-2">OR / หรือใส่ลิงก์</p>
+                <input 
+                  type="url" 
+                  class="w-full bg-white border-[3px] border-ink px-4 py-3 focus:outline-none transition-colors text-ink font-bold text-sm"
+                  placeholder="https://... (URL รูปภาพ)"
+                  id="image-url-input"
+                >
+              </div>
+            </div>
+
+            <div id="image-preview-container" class="mt-4 w-full h-56 border-[3px] border-ink bg-white p-2 btn-shadow relative" style="display: none;">
+              <img id="image-preview" src="" alt="Preview" class="w-full h-full object-cover vintage-filter">
+              <button 
+                type="button"
+                onclick="clearImagePreview()"
+                class="absolute top-4 right-4 bg-rust text-white px-2 py-1 text-xs font-bold border-[2px] border-ink"
+              >
+                เปลี่ยนรูป
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-xs font-black text-ink uppercase tracking-widest mb-2">Item Name / ชื่อสินค้า <span class="text-rust">*</span></label>
+              <input 
+                type="text" 
+                required
+                class="w-full bg-cream border-[3px] border-ink px-4 py-3 focus:bg-white focus:outline-none transition-colors font-bold text-ink btn-shadow"
+                placeholder="เช่น Levi's 501xx Big E"
+                id="product-name-input"
+              >
+            </div>
+            <div>
+              <label class="block text-xs font-black text-ink uppercase tracking-widest mb-2">Category / หมวดหมู่ <span class="text-rust">*</span></label>
+              <div class="relative">
+                <select 
+                  class="w-full bg-cream border-[3px] border-ink px-4 py-3 focus:bg-white focus:outline-none transition-colors font-bold text-ink appearance-none cursor-pointer btn-shadow"
+                  id="category-select"
+                ></select>
+                <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rotate-90"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div>
+            <label class="block text-xs font-black text-ink uppercase tracking-widest mb-2">Description / รายละเอียด (ป้าย, ไซส์, ตำหนิ)</label>
+            <textarea 
+              class="w-full bg-cream border-[3px] border-ink px-4 py-3 focus:bg-white focus:outline-none h-32 resize-none transition-colors text-ink font-bold btn-shadow"
+              placeholder="ระบุตำหนิให้ชัดเจน เช่น ตะเข็บเดี่ยว/คู่, ริมแดง..."
+              id="description-input"
+            ></textarea>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label class="block text-xs font-black text-ink uppercase tracking-widest mb-2">Starting Bid / ราคาเปิด <span class="text-rust">*</span></label>
+              <div class="relative">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink font-black text-lg">฿</span>
+                <input 
+                  type="number" 
+                  required
+                  min="1"
+                  class="w-full bg-cream border-[3px] border-ink pl-10 pr-4 py-3 focus:bg-white focus:outline-none text-xl font-black text-ink transition-colors btn-shadow"
+                  placeholder="0"
+                  id="start-price-input"
+                >
+              </div>
+            </div>
+            <div>
+              <label class="block text-xs font-black text-ink uppercase tracking-widest mb-2">Duration / ระยะเวลาประมูล <span class="text-rust">*</span></label>
+              <div class="relative">
+                <select 
+                  class="w-full bg-cream border-[3px] border-ink pl-12 pr-4 py-3 focus:bg-white focus:outline-none transition-colors font-bold text-ink appearance-none cursor-pointer btn-shadow"
+                  id="duration-select"
+                >
+                  <option value="1">1 ชั่วโมง</option>
+                  <option value="3">3 ชั่วโมง</option>
+                  <option value="6">6 ชั่วโมง</option>
+                  <option value="12">12 ชั่วโมง</option>
+                  <option value="24" selected>24 ชั่วโมง (1 วัน)</option>
+                  <option value="48">48 ชั่วโมง (2 วัน)</option>
+                  <option value="72">72 ชั่วโมง (3 วัน)</option>
+                  <option value="168">168 ชั่วโมง (7 วัน)</option>
+                </select>
+                <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                </div>
+                <div class="absolute inset-y-0 right-4 flex items-center pointer-events-none">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="rotate-90"><path d="m9 18 6-6-6-6"/></svg>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-8">
+            <button 
+              type="submit"
+              class="w-full bg-amber hover:bg-rust text-ink hover:text-cream font-black uppercase tracking-widest py-4 border-[3px] border-ink transition-all-smooth flex items-center justify-center gap-2 text-lg"
+              style="box-shadow: 6px 6px 0px #2B2620;"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="m12 18-4-4 4-4"/><path d="m8 14h8"/></svg>
+              List For Auction
+            </button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- Detail Page -->
+    <section id="detail-page" class="space-y-6 pb-12" style="display: none;">
+      <div class="flex items-center gap-4 bg-white border-[3px] border-ink p-3 btn-shadow">
+        <button 
+          onclick="navigateTo('BROWSE')"
+          class="w-8 h-8 bg-cream border-[2px] border-ink flex items-center justify-center text-ink hover:bg-rust hover:text-white transition-colors"
+          aria-label="กลับ"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" x2="5" y1="12" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div class="text-xs font-black text-ink uppercase tracking-widest flex items-center gap-2">
+          <span class="cursor-pointer hover:underline decoration-[2px]" onclick="navigateTo('BROWSE')">Catalog</span>
+          <span class="text-rust">/</span>
+          <span class="cursor-pointer hover:underline decoration-[2px]" id="detail-category-link"></span>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div class="lg:col-span-8 space-y-8">
+          <div class="bg-white border-[3px] border-ink card-shadow-lg overflow-hidden flex flex-col md:flex-row relative">
+            <div class="w-full md:w-1/2 h-80 md:h-auto border-b-[3px] md:border-b-0 md:border-r-[3px] border-ink bg-cream p-3">
+              <div class="w-full h-full border-[3px] border-ink overflow-hidden relative">
+                <img id="detail-image" src="" alt="Product" class="w-full h-full object-cover vintage-filter">
+                <div class="absolute top-0 right-0 bg-ink text-white font-mono text-xs px-2 py-1 border-l-[3px] border-b-[3px] border-ink" id="detail-lot-number"></div>
+              </div>
+            </div>
+            
+            <div class="w-full md:w-1/2 p-6 md:p-8 flex flex-col paper-texture">
+              <div class="mb-4">
+                <span class="bg-ink text-cream text-[10px] font-black px-3 py-1 uppercase tracking-widest border-[2px] border-ink" id="detail-category-badge"></span>
+              </div>
+              <h2 class="text-3xl md:text-4xl font-black text-ink leading-none mb-4 font-display uppercase tracking-tight" id="detail-title"></h2>
+              
+              <div class="bg-cream border-[3px] border-ink p-4 mb-6 flex-1" style="box-shadow: 4px 4px 0px rgba(0,0,0,0.1);">
+                <p class="text-ink text-sm leading-relaxed font-bold whitespace-pre-line" id="detail-description"></p>
+              </div>
+              
+              <div class="flex items-center gap-4 p-4 border-[3px] border-ink" id="detail-timer-container">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="detail-timer-icon"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <div>
+                  <p class="text-[10px] font-black uppercase tracking-widest mb-0.5 opacity-80">Time Remaining</p>
+                  <p class="text-3xl font-black font-mono tracking-tighter leading-none" id="detail-timer"></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-cream border-[3px] border-ink card-shadow-lg p-6 md:p-8 relative">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-6 mb-8 border-b-[3px] border-dashed border-ink pb-6">
+              <div>
+                <p class="text-[10px] font-black text-ink/60 uppercase tracking-widest mb-1">Current High Bid</p>
+                <div class="flex items-baseline gap-2 text-rust">
+                  <span class="text-5xl sm:text-6xl font-black font-mono tracking-tighter" id="detail-current-price"></span>
+                  <span class="text-2xl font-black">THB</span>
+                </div>
+              </div>
+              
+              <div id="detail-winner-badge" class="px-4 py-2 border-[3px] text-xs font-black uppercase tracking-widest flex items-center gap-2 btn-shadow" style="display: none;"></div>
+            </div>
+
+            <div id="detail-bidding-section"></div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-4 space-y-8">
+          <div class="bg-white border-[3px] border-ink card-shadow-lg p-6 flex flex-col h-[420px] paper-texture">
+            <div class="flex items-center justify-between mb-4 border-b-[3px] border-ink pb-4 bg-white/80 p-2 border-[2px]">
+              <h3 class="font-black text-ink text-lg uppercase font-display tracking-tight flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+                Bid Ledger
+              </h3>
+              <span class="bg-ink text-white text-[10px] font-black px-2 py-1 uppercase" id="bid-count">0 Entries</span>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar" id="bid-ledger">
+              <div class="h-full flex flex-col items-center justify-center text-ink/40 gap-3">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/><path d="m18 6 3 3"/><path d="M16.5 7.5 19 10"/><path d="m12 12 6 6"/><path d="m2 7 4.5 4.5"/><path d="m14 3 3 3"/></svg>
+                <p class="text-sm font-bold uppercase tracking-widest text-center">Ledger Empty<br>Place First Bid</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="bg-[#1A1A1A] border-[3px] border-ink card-shadow p-6 terminal-text" style="box-shadow: 8px 8px 0px #D04A3C;">
+            <h3 class="font-bold text-[10px] uppercase tracking-widest mb-4 flex items-center gap-2 border-b border-[#33FF00]/30 pb-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" x2="12" y1="9" y2="13"/><line x1="12" x2="12.01" y1="17" y2="17"/></svg>
+              System Overrides
+            </h3>
+            <div class="space-y-4">
+              <button 
+                id="force-rival-btn"
+                class="w-full bg-transparent hover:bg-[#33FF00]/20 disabled:opacity-50 border border-[#33FF00] font-bold py-2 text-xs uppercase tracking-widest transition-colors"
+              >
+                > Force Rival Bid
+              </button>
+              <button 
+                id="toggle-bot-btn"
+                class="w-full font-bold py-2 text-xs uppercase tracking-widest transition-colors border border-[#33FF00]"
+              >
+                > Enable Botnet (3.5s)
+              </button>
+              <p id="bot-status" class="text-[9px] text-center animate-pulse-glow mt-2 flex items-center justify-center gap-2" style="display: none;">
+                <span>[</span>
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                System Scanning
+                <span>]</span>
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Proxy Bid Modal -->
+  <div id="proxy-modal" class="fixed inset-0 bg-ink/80 backdrop-blur-sm z-[70] flex items-center justify-center p-4" style="display: none;">
+    <div class="bg-cream border-[4px] border-ink w-full max-w-sm p-8" style="box-shadow: 12px 12px 0px #2B2620;">
+      <div class="w-16 h-16 bg-ink border-[3px] border-cream flex items-center justify-center mb-6 transform -rotate-3" style="box-shadow: 4px 4px 0px #D78B3F;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#EBE5D9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+      </div>
+      <h3 class="text-3xl font-black text-ink mb-2 font-display uppercase tracking-tight">Proxy Bid</h3>
+      <p class="text-xs font-bold uppercase tracking-wider text-ink/70 mb-6 leading-relaxed border-b-[3px] border-ink border-dashed pb-6">
+        Set max budget for <br><span class="text-rust font-black" id="proxy-item-name"></span>
+      </p>
+      <div class="mb-8">
+        <label class="block text-[10px] font-black text-ink uppercase tracking-widest mb-2">Max Budget (THB)</label>
+        <div class="relative">
+          <span class="absolute left-4 top-1/2 -translate-y-1/2 text-ink font-black text-lg">฿</span>
+          <input 
+            type="number" 
+            class="w-full bg-white border-[3px] border-ink pl-10 pr-4 py-3 focus:outline-none font-mono text-2xl font-black text-ink btn-shadow"
+            id="proxy-amount-input"
+          >
+        </div>
+      </div>
+      <div class="flex gap-4">
+        <button onclick="closeProxyModal()" class="flex-1 bg-white hover:bg-cream text-ink font-black uppercase tracking-widest text-xs py-4 border-[3px] border-ink btn-shadow transition-all-smooth">Cancel</button>
+        <button onclick="handleSetProxy()" class="flex-1 bg-rust hover:bg-ink text-white font-black uppercase tracking-widest text-xs py-4 border-[3px] border-ink btn-shadow transition-all-smooth">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== STATE MANAGEMENT ====================
+    const RIVAL_USER = { id: 'u2', name: 'บอทคู่แข่ง (นักสะสม)' };
+    
+    const CATEGORIES = [
+      { id: 'ALL', name: 'ทั้งหมด', icon: 'grid' },
+      { id: 'BAND_TEES', name: 'เสื้อวงวินเทจ', icon: 'music' },
+      { id: 'VINTAGE_DENIM', name: 'ยีนส์/เดนิม', icon: 'scissors' },
+      { id: 'SHOES', name: 'รองเท้าวินเทจ', icon: 'footprints' },
+      { id: 'MILITARY', name: 'ทหาร/เวิร์คแวร์', icon: 'shield' },
+      { id: 'ACCESSORIES', name: 'แว่น/นาฬิกา', icon: 'clock' },
+    ];
+
+    let currentUser = null;
+    let registerRole = 'BIDDER';
+    let currentView = 'REGISTER';
+    let activeAuctionId = null;
+    let selectedCategory = 'ALL';
+    let isAutoBotEnabled = false;
+    let botInterval = null;
+    let timerInterval = null;
+    let newProductPreview = '';
+
+    let auctions = [
+      {
+        id: 'v1',
+        name: "Levi's 501xx Big E ปี 1966",
+        category: 'VINTAGE_DENIM',
+        description: 'กางเกงยีนส์ Levi\'s 501xx ป้าย Big E แท้ๆ ปี 1966 ริมแดง ตะเข็บซิงเกิ้ล สภาพเฟดกำลังสวย เป้าไม่ขาด หายากสุดๆ ในยุคนี้ นักปั้นยีนส์ต้องโดน',
+        startPrice: 25000,
+        currentPrice: 25000,
+        images: 'https://images.unsplash.com/photo-1542272454315-4c01d7abdf4a?auto=format&fit=crop&q=80&w=1200', 
+        winnerId: null,
+        status: 'ACTIVE',
+        timeLeft: 300, 
+        bids: [],
+        proxyBids: {}
+      },
+      {
+        id: 'v2',
+        name: 'เสื้อวง NIRVANA "In Utero" 1993',
+        category: 'BAND_TEES',
+        description: 'เสื้อวง Nirvana ลาย In Utero ปี 1993 ของแท้ ป้าย Giant ตะเข็บเดี่ยวบนล่าง สภาพ 85% สีดำเฟดสวย มีรูมด 1 จุดตรงชายเสื้อ คลาสสิกตลอดกาล',
+        startPrice: 15000,
+        currentPrice: 15000,
+        images: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&q=80&w=1200',
+        winnerId: null,
+        status: 'ACTIVE',
+        timeLeft: 120, 
+        bids: [],
+        proxyBids: {}
+      },
+      {
+        id: 'v3',
+        name: 'US Army M-65 Field Jacket (1st Gen)',
+        category: 'MILITARY',
+        description: 'เสื้อแจ็คเก็ตทหารอเมริกัน M-65 รุ่นแรก (ไม่มีอินทรธนู) ซิปเงิน Crown สภาพผ่านศึกสมจริง เฟดจัดๆ สายเวิร์คแวร์และทหารไม่ควรพลาด',
+        startPrice: 4500,
+        currentPrice: 4500,
+        images: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&q=80&w=1200', 
+        winnerId: null,
+        status: 'ACTIVE',
+        timeLeft: 45, 
+        bids: [],
+        proxyBids: {}
+      },
+      {
+        id: 'v4',
+        name: 'แว่นตา Ray-Ban Wayfarer B&L USA',
+        category: 'ACCESSORIES',
+        description: 'แว่น Ray-Ban Wayfarer ผลิตโดย Bausch & Lomb (USA) ยุค 80s เลนส์ G-15 มีรอยสลัก BL สภาพเก็บสะสม มาพร้อมซองหนังแท้สุดคลาสสิก',
+        startPrice: 5500,
+        currentPrice: 5500,
+        images: 'https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&q=80&w=1200', 
+        winnerId: null,
+        status: 'ACTIVE',
+        timeLeft: 600,
+        bids: [],
+        proxyBids: {}
+      }
+    ];
+
+    // ==================== UTILITY FUNCTIONS ====================
+    function getIncrement(currentPrice) {
+      if (currentPrice < 1000) return 50;
+      if (currentPrice < 5000) return 100;
+      if (currentPrice < 10000) return 500;
+      return 1000;
+    }
+
+    function formatCurrency(amount) {
+      return `฿${amount.toLocaleString('th-TH')}`;
+    }
+
+    function formatTime(seconds) {
+      const h = Math.floor(seconds / 3600);
+      const m = Math.floor((seconds % 3600) / 60);
+      const s = seconds % 60;
+      if (h > 0) return `${h}h ${m}m`;
+      return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function getBidderName(uid) {
+      if (currentUser && uid === currentUser.id) return currentUser.name;
+      if (uid === RIVAL_USER.id) return RIVAL_USER.name;
+      return `นักสะสม-${uid.substring(0, 4)}`;
+    }
+
+    function generateId() {
+      return Math.random().toString(36).substr(2, 9);
+    }
+
+    // ==================== NOTIFICATION SYSTEM ====================
+    function notify(message, type = 'info') {
+      const container = document.getElementById('notifications-container');
+      const notification = document.createElement('div');
+      notification.className = `p-4 border-[3px] border-ink flex items-center gap-3 w-80 pointer-events-auto notification-enter font-bold ${
+        type === 'error' ? 'bg-rust text-cream' : 
+        type === 'warning' ? 'bg-amber text-ink' : 
+        'bg-white text-ink'
+      }`;
+      notification.style.boxShadow = '4px 4px 0px #2B2620';
+      
+      notification.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span class="text-sm leading-relaxed">${message}</span>
+      `;
+      
+      container.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.classList.remove('notification-enter');
+        notification.classList.add('notification-exit');
+        setTimeout(() => notification.remove(), 300);
+      }, 3000);
+    }
+
+    // ==================== NAVIGATION ====================
+    function navigateTo(view, auctionId = null) {
+      currentView = view;
+      activeAuctionId = auctionId;
+      
+      document.getElementById('register-page').style.display = 'none';
+      document.getElementById('browse-page').style.display = 'none';
+      document.getElementById('create-page').style.display = 'none';
+      document.getElementById('detail-page').style.display = 'none';
+      
+      if (view === 'REGISTER') {
+        document.getElementById('register-page').style.display = 'block';
+        document.getElementById('header').style.display = 'none';
+      } else if (view === 'BROWSE') {
+        document.getElementById('browse-page').style.display = 'block';
+        document.getElementById('header').style.display = 'block';
+        renderAuctionsGrid();
+      } else if (view === 'CREATE') {
+        document.getElementById('create-page').style.display = 'block';
+        document.getElementById('header').style.display = 'block';
+      } else if (view === 'DETAIL') {
+        document.getElementById('detail-page').style.display = 'block';
+        document.getElementById('header').style.display = 'block';
+        renderDetailPage();
+      }
+      
+      window.scrollTo(0, 0);
+    }
+
+    // ==================== REGISTRATION ====================
+    function setRegisterRole(role) {
+      registerRole = role;
+      document.querySelectorAll('.register-role-btn').forEach(btn => {
+        const isSelected = btn.dataset.role === role;
+        btn.className = `p-4 border-[3px] flex flex-col items-center justify-center gap-2 transition-all-smooth font-bold uppercase ${
+          isSelected 
+            ? (role === 'BIDDER' ? 'bg-amber text-ink border-ink btn-shadow' : 'bg-rust text-cream border-ink btn-shadow')
+            : 'border-ink/30 bg-white text-ink/50 hover:border-ink hover:text-ink'
+        }`;
+      });
+    }
+
+    function handleRegister(e) {
+      e.preventDefault();
+      const name = document.getElementById('register-name-input').value.trim();
+      if (!name) return;
+      
+      currentUser = { id: 'u1', name, role: registerRole };
+      
+      document.getElementById('user-display-name').textContent = currentUser.name;
+      document.getElementById('user-display-role').textContent = currentUser.role === 'SELLER' ? 'Merchant' : 'Collector';
+      document.getElementById('user-menu').style.display = 'flex';
+      
+      renderHeaderNav();
+      navigateTo('BROWSE');
+      notify(`ยินดีต้อนรับเข้าสู่ตลาดวินเทจ, ${name}`, 'success');
+    }
+
+    function handleLogout() {
+      currentUser = null;
+      if (botInterval) clearInterval(botInterval);
+      navigateTo('REGISTER');
+      document.getElementById('user-menu').style.display = 'none';
+      document.getElementById('header').style.display = 'none';
+    }
+
+    // ==================== HEADER NAVIGATION ====================
+    function renderHeaderNav() {
+      const nav = document.getElementById('header-nav');
+      let html = `
+        <button 
+          onclick="navigateTo('BROWSE')"
+          class="px-4 py-1.5 font-bold uppercase tracking-wider text-sm border-[3px] border-ink transition-all-smooth flex items-center gap-2 ${currentView === 'BROWSE' || currentView === 'DETAIL' ? 'bg-ink text-cream' : 'bg-white text-ink hover:bg-amber'}"
+          style="${currentView === 'BROWSE' || currentView === 'DETAIL' ? 'box-shadow: 3px 3px 0px #D04A3C;' : 'box-shadow: 3px 3px 0px #2B2620;'}"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          Market
+        </button>
+      `;
+      
+      if (currentUser && currentUser.role === 'SELLER') {
+        html += `
+          <button 
+            onclick="navigateTo('CREATE')"
+            class="px-4 py-1.5 font-bold uppercase tracking-wider text-sm border-[3px] border-ink transition-all-smooth flex items-center gap-2 ${currentView === 'CREATE' ? 'bg-amber text-ink' : 'bg-white text-ink hover:bg-amber'} btn-shadow"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/><path d="M12 8v8"/></svg>
+            Sell Item
+          </button>
+        `;
+      }
+      
+      nav.innerHTML = html;
+    }
+
+    // ==================== CATEGORY FILTERS ====================
+    function renderCategoryFilters() {
+      const container = document.getElementById('category-filters');
+      container.innerHTML = CATEGORIES.map(cat => {
+        const isActive = selectedCategory === cat.id;
+        return `
+          <button
+            onclick="selectCategory('${cat.id}')"
+            class="px-4 py-2 whitespace-nowrap font-black uppercase text-xs tracking-wider border-[3px] transition-all-smooth flex items-center gap-2 ${
+              isActive 
+                ? 'bg-ink text-cream border-ink translate-y-[-2px]' 
+                : 'bg-white text-ink border-ink hover:bg-amber'
+            }"
+            style="${isActive ? 'box-shadow: 3px 3px 0px #D04A3C;' : 'box-shadow: 3px 3px 0px #2B2620;'}"
+          >
+            ${getCategoryIcon(cat.icon)}
+            ${cat.name}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function getCategoryIcon(icon) {
+      const icons = {
+        grid: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>',
+        music: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>',
+        scissors: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><line x1="20" x2="8.12" y1="4" y2="15.88"/><line x1="14.47" x2="20" y1="14.48" y2="20"/><line x1="8.12" x2="12" y1="8.12" y2="12"/></svg>',
+        footprints: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 16v-2.38C4 11.5 2.97 10.5 3 8c.03-2.72 1.49-6 4.5-6C9.37 2 10 3.8 10 5.5c0 3.11-2 5.66-2 8.68V16a2 2 0 1 1-4 0Z"/><path d="M20 20v-2.38c0-2.12 1.03-3.12 1-5.62-.03-2.72-1.49-6-4.5-6-1.87 0-2.5 1.8-2.5 3.5 0 3.11 2 5.66 2 8.68V20a2 2 0 1 0 4 0Z"/></svg>',
+        shield: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>',
+        clock: '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>'
+      };
+      return icons[icon] || icons.grid;
+    }
+
+    function selectCategory(catId) {
+      selectedCategory = catId;
+      renderCategoryFilters();
+      renderAuctionsGrid();
+    }
+
+    // ==================== AUCTIONS GRID ====================
+    function renderAuctionsGrid() {
+      const displayAuctions = selectedCategory === 'ALL' 
+        ? auctions 
+        : auctions.filter(a => a.category === selectedCategory);
+      
+      document.getElementById('listing-count').textContent = displayAuctions.length;
+      
+      const grid = document.getElementById('auctions-grid');
+      const noItems = document.getElementById('no-items');
+      
+      if (displayAuctions.length === 0) {
+        grid.style.display = 'none';
+        noItems.style.display = 'flex';
+        return;
+      }
+      
+      grid.style.display = 'grid';
+      noItems.style.display = 'none';
+      
+      grid.innerHTML = displayAuctions.map((auct, index) => {
+        const isEnding = auct.timeLeft < 60 && auct.status === 'ACTIVE';
+        return `
+          <div 
+            onclick="navigateToDetail('${auct.id}')" 
+            class="bg-white border-[3px] border-ink hover:shadow-[10px_10px_0px_#D04A3C] hover:-translate-y-1 hover:-translate-x-1 transition-all-smooth cursor-pointer group flex flex-col h-full relative p-2 card-shadow fade-in-up stagger-${(index % 5) + 1}"
+          >
+            <div class="absolute -top-3 -right-3 z-10 border-[3px] border-ink px-3 py-1 font-black text-[10px] uppercase tracking-widest flex items-center gap-1 ${
+              auct.status === 'ACTIVE' 
+                ? (isEnding ? 'bg-rust text-white animate-bounce' : 'bg-amber text-ink')
+                : 'bg-cream text-ink'
+            }" style="box-shadow: 2px 2px 0px #2B2620;">
+              ${auct.status === 'ACTIVE' 
+                ? `<span class="w-1.5 h-1.5 bg-current rounded-full animate-pulse"></span> LIVE`
+                : 'CLOSED'
+              }
+            </div>
+            
+            <div class="w-full h-56 border-[3px] border-ink overflow-hidden mb-3 relative bg-cream">
+              <img src="${auct.images}" alt="${auct.name}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700 vintage-filter" onerror="this.src='https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400'">
+            </div>
+            
+            <div class="px-2 flex-1 flex flex-col pb-2">
+              <p class="text-[10px] font-black text-rust uppercase tracking-widest mb-1">
+                ${CATEGORIES.find(c => c.id === auct.category)?.name || 'UNKNOWN'}
+              </p>
+              <h3 class="font-black text-ink text-lg leading-tight mb-3 font-display uppercase tracking-tight line-clamp-2">${auct.name}</h3>
+              <div class="mt-auto pt-3 border-t-[3px] border-dotted border-ink flex items-end justify-between">
+                <div>
+                  <p class="text-[10px] font-bold text-ink/60 uppercase tracking-widest mb-0.5">Current Bid</p>
+                  <p class="font-black text-ink text-xl font-mono tracking-tighter">${formatCurrency(auct.currentPrice)}</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-[10px] font-bold text-ink/60 uppercase tracking-widest mb-0.5">Time Left</p>
+                  <p class="font-black text-lg font-mono tracking-tighter ${isEnding ? 'text-rust' : 'text-ink'}">
+                    ${auct.status === 'ACTIVE' ? formatTime(auct.timeLeft) : '00:00'}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function navigateToDetail(id) {
+      activeAuctionId = id;
+      navigateTo('DETAIL', id);
+    }
+
+    // ==================== DETAIL PAGE ====================
+    function renderDetailPage() {
+      const auction = auctions.find(a => a.id === activeAuctionId);
+      if (!auction) {
+        navigateTo('BROWSE');
+        return;
+      }
+
+      // Update basic info
+      document.getElementById('detail-image').src = auction.images;
+      document.getElementById('detail-lot-number').textContent = `LOT #${auction.id.toUpperCase()}`;
+      document.getElementById('detail-category-badge').textContent = CATEGORIES.find(c => c.id === auction.category)?.name || 'UNKNOWN';
+      document.getElementById('detail-title').textContent = auction.name;
+      document.getElementById('detail-description').textContent = auction.description;
+      document.getElementById('detail-current-price').textContent = formatCurrency(auction.currentPrice).replace('฿', '');
+      
+      // Category link
+      const categoryLink = document.getElementById('detail-category-link');
+      categoryLink.textContent = CATEGORIES.find(c => c.id === auction.category)?.name;
+      categoryLink.onclick = () => {
+        selectedCategory = auction.category;
+        navigateTo('BROWSE');
+      };
+
+      // Timer
+      updateDetailTimer();
+      
+      // Winner badge
+      const winnerBadge = document.getElementById('detail-winner-badge');
+      if (auction.winnerId) {
+        winnerBadge.style.display = 'flex';
+        const isCurrentUser = currentUser && auction.winnerId === currentUser.id;
+        winnerBadge.className = `px-4 py-2 border-[3px] text-xs font-black uppercase tracking-widest flex items-center gap-2 btn-shadow ${
+          isCurrentUser ? 'bg-amber border-ink text-ink' : 'bg-white border-ink text-ink'
+        }`;
+        winnerBadge.innerHTML = isCurrentUser 
+          ? `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/></svg> You lead the bid!`
+          : `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> By: ${getBidderName(auction.winnerId)}`;
+      } else {
+        winnerBadge.style.display = 'none';
+      }
+
+      // Bidding section
+      renderBiddingSection();
+      
+      // Bid ledger
+      renderBidLedger();
+      
+      // System overrides
+      setupSystemOverrides();
+    }
+
+    function updateDetailTimer() {
+      const auction = auctions.find(a => a.id === activeAuctionId);
+      if (!auction) return;
+
+      const timerContainer = document.getElementById('detail-timer-container');
+      const timer = document.getElementById('detail-timer');
+      const timerIcon = document.getElementById('detail-timer-icon');
+      
+      const isEnding = auction.timeLeft < 60 && auction.status === 'ACTIVE';
+      
+      timerContainer.className = `flex items-center gap-4 p-4 border-[3px] border-ink ${isEnding ? 'bg-rust text-white' : 'bg-white text-ink'}`;
+      timer.textContent = auction.status === 'ACTIVE' ? formatTime(auction.timeLeft) : 'CLOSED';
+      
+      if (isEnding) {
+        timerIcon.classList.add('animate-pulse');
+      } else {
+        timerIcon.classList.remove('animate-pulse');
+      }
+    }
+
+    function renderBiddingSection() {
+      const auction = auctions.find(a => a.id === activeAuctionId);
+      const section = document.getElementById('detail-bidding-section');
+      
+      if (auction.status !== 'ACTIVE') {
+        section.innerHTML = `
+          <div class="bg-white border-[3px] border-ink p-8 text-center btn-shadow">
+            <p class="text-rust font-black text-2xl uppercase font-display mb-2 tracking-widest">Auction Closed</p>
+            ${auction.winnerId 
+              ? `<p class="text-lg font-bold text-ink">Winner: <span class="font-black uppercase bg-amber px-2 py-0.5 ml-1 border-[2px] border-ink">${auction.winnerId === currentUser?.id ? 'YOU!' : getBidderName(auction.winnerId)}</span></p>`
+              : '<p class="text-ink font-bold">No bids were placed on this item.</p>'
+            }
+          </div>
+        `;
+        return;
+      }
+      
+      if (currentUser?.role === 'SELLER') {
+        section.innerHTML = `
+          <div class="bg-white border-[3px] border-ink p-6 text-center btn-shadow">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="text-ink/50 mx-auto mb-3"><path d="m2 7 4.41-4.41A2 2 0 0 1 7.83 2h8.34a2 2 0 0 1 1.42.59L22 7"/><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M15 22v-4a2 2 0 0 0-2-2h-2a2 2 0 0 0-2 2v4"/><path d="M2 7h20"/><path d="M22 7v3a2 2 0 0 1-2 2v0a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 16 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 12 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 8 12a2.7 2.7 0 0 1-1.59-.63.7.7 0 0 0-.82 0A2.7 2.7 0 0 1 4 12v0a2 2 0 0 1-2-2V7"/></svg>
+            <p class="font-black text-xl uppercase tracking-wider text-ink">Merchant View</p>
+            <p class="text-sm font-bold mt-2 text-ink/70">You cannot bid on your own item. Watch the numbers go up!</p>
+          </div>
+        `;
+        return;
+      }
+
+      const nextRequiredBid = auction.currentPrice + (auction.bids.length === 0 ? 0 : getIncrement(auction.currentPrice));
+      const hasProxy = currentUser && auction.proxyBids[currentUser.id];
+
+      section.innerHTML = `
+        <div class="space-y-6">
+          ${hasProxy ? `
+            <div class="bg-ink text-white px-5 py-4 border-[3px] border-ink flex items-center justify-between font-black text-xs uppercase tracking-widest" style="box-shadow: 4px 4px 0px #D78B3F;">
+              <span class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#D78B3F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/><path d="m9 12 2 2 4-4"/></svg>
+                Auto-Bid Active
+              </span>
+              <span class="font-mono text-base text-amber">Limit: ${formatCurrency(auction.proxyBids[currentUser.id])}</span>
+            </div>
+          ` : ''}
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <button 
+              onclick="handleQuickBid()"
+              class="bg-ink hover:bg-rust text-cream font-black py-4 px-6 border-[3px] border-ink transition-all-smooth flex flex-col items-center justify-center uppercase"
+              style="box-shadow: 6px 6px 0px #2B2620;"
+            >
+              <span class="text-sm tracking-widest mb-1">Quick Bid</span>
+              <span class="text-2xl font-mono text-amber">${formatCurrency(nextRequiredBid)}</span>
+            </button>
+            <div class="flex flex-col gap-2">
+              <label class="text-[10px] font-black text-ink uppercase tracking-widest">Custom Bid Amount</label>
+              <div class="flex gap-2 h-full">
+                <input 
+                  type="number" 
+                  placeholder="Min ${nextRequiredBid}"
+                  class="w-full bg-white border-[3px] border-ink px-4 font-mono text-xl font-black focus:outline-none focus:bg-cream transition-colors btn-shadow"
+                  id="custom-bid-input"
+                  min="${nextRequiredBid}"
+                >
+                <button 
+                  onclick="handleManualBid()"
+                  class="bg-white hover:bg-ink hover:text-white border-[3px] border-ink text-ink font-black uppercase text-sm px-6 transition-all-smooth btn-shadow"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="pt-4 text-center">
+            <button 
+              onclick="openProxyModal()"
+              class="inline-flex items-center gap-2 font-black text-xs uppercase tracking-widest text-ink hover:text-rust transition-colors bg-white px-6 py-3 border-[3px] border-ink btn-shadow"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              Setup Proxy Bid
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderBidLedger() {
+      const auction = auctions.find(a => a.id === activeAuctionId);
+      const ledger = document.getElementById('bid-ledger');
+      document.getElementById('bid-count').textContent = `${auction.bids.length} Entries`;
+      
+      if (auction.bids.length === 0) {
+        ledger.innerHTML = `
+          <div class="h-full flex flex-col items-center justify-center text-ink/40 gap-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"><path d="m15 12-8.373 8.373a1 1 0 1 1-3-3L12 9"/><path d="m18 6 3 3"/><path d="M16.5 7.5 19 10"/><path d="m12 12 6 6"/><path d="m2 7 4.5 4.5"/><path d="m14 3 3 3"/></svg>
+            <p class="text-sm font-bold uppercase tracking-widest text-center">Ledger Empty<br>Place First Bid</p>
+          </div>
+        `;
+        return;
+      }
+      
+      ledger.innerHTML = auction.bids.map((bid, index) => `
+        <div class="flex justify-between items-center p-3 border-[2px] border-ink ${index === 0 ? 'bg-amber btn-shadow' : 'bg-white'}">
+          <div>
+            <p class="font-black text-xs text-ink flex items-center gap-1.5 uppercase">
+              ${getBidderName(bid.userId)}
+              ${bid.isAutoProxy ? '<span class="bg-ink text-cream text-[8px] px-1 py-0.5 tracking-widest">BOT</span>' : ''}
+            </p>
+            <p class="text-[9px] text-ink/70 font-bold mt-0.5 font-mono">
+              ${new Date(bid.timestamp).toLocaleTimeString('th-TH')}
+            </p>
+          </div>
+          <div class="font-black font-mono text-sm ${index === 0 ? 'text-ink' : 'text-ink/60'}">
+            ${formatCurrency(bid.amount)}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // ==================== BIDDING FUNCTIONS ====================
+    function processBid(auctionId, userId, amount, isAutoProxy = false) {
+      const auctionIndex = auctions.findIndex(a => a.id === auctionId);
+      if (auctionIndex === -1) return;
+      
+      const auction = auctions[auctionIndex];
+      if (auction.status !== 'ACTIVE' || amount <= auction.currentPrice) return;
+
+      const newBid = {
+        id: generateId(),
+        userId,
+        amount,
+        timestamp: new Date().toISOString(),
+        isAutoProxy
+      };
+
+      const newTimeLeft = auction.timeLeft < 30 ? auction.timeLeft + 30 : auction.timeLeft;
+
+      auctions[auctionIndex] = {
+        ...auction,
+        currentPrice: amount,
+        winnerId: userId,
+        timeLeft: newTimeLeft,
+        bids: [newBid, ...auction.bids]
+      };
+
+      // Check for proxy bids
+      setTimeout(() => {
+        const currentAuction = auctions.find(a => a.id === auctionId);
+        if (!currentAuction || currentAuction.status !== 'ACTIVE') return;
+
+        const proxies = currentAuction.proxyBids;
+        let highestProxyUser = null;
+        let highestProxyAmount = 0;
+
+        for (const [uid, maxAmt] of Object.entries(proxies)) {
+          const amt = Number(maxAmt);
+          if (amt > highestProxyAmount) {
+            highestProxyAmount = amt;
+            highestProxyUser = uid;
+          }
+        }
+
+        if (highestProxyUser && highestProxyUser !== userId && highestProxyAmount > currentAuction.currentPrice) {
+          const nextReqBid = currentAuction.currentPrice + getIncrement(currentAuction.currentPrice);
+          const autoBidAmount = Math.min(nextReqBid, highestProxyAmount);
+          
+          if (autoBidAmount > currentAuction.currentPrice) {
+            processBid(auctionId, highestProxyUser, autoBidAmount, true);
+          }
+        }
+      }, 500);
+
+      // Update UI
+      if (currentView === 'DETAIL' && activeAuctionId === auctionId) {
+        renderDetailPage();
+      }
+      renderAuctionsGrid();
+    }
+
+    function handleQuickBid() {
+      if (!currentUser) return;
+      const auction = auctions.find(a => a.id === activeAuctionId);
+      if (!auction) return;
+      
+      const nextRequiredBid = auction.currentPrice + (auction.bids.length === 0 ? 0 : getIncrement(auction.currentPrice));
+      processBid(activeAuctionId, currentUser.id, nextRequiredBid);
+      notify('เสนอราคาสำเร็จ!', 'success');
+    }
+
+    function handleManualBid() {
+      if (!currentUser) return;
+      const auction = auctions.find(a => a.id === activeAuctionId);
+      if (!auction) return;
+      
+      const input = document.getElementById('custom-bid-input');
+      const amount = Number(input.value);
+      const nextRequiredBid = auction.currentPrice + (auction.bids.length === 0 ? 0 : getIncrement(auction.currentPrice));
+      
+      if (isNaN(amount) || amount < nextRequiredBid) {
+        notify(`ต้องใส่ราคาขั้นต่ำ ${formatCurrency(nextRequiredBid)}`, 'error');
+        return;
+      }
+      
+      processBid(activeAuctionId, currentUser.id, amount);
+      input.value = '';
+      notify('เสนอราคาสำเร็จ!', 'success');
+    }
+
+    // ==================== PROXY BID ====================
+    function openProxyModal() {
+      const auction = auctions.find(a => a.id === activeAuctionId);
+      if (!auction) return;
+      
+      document.getElementById('proxy-item-name').textContent = auction.name.substring(0, 20) + '...';
+      document.getElementById('proxy-amount-input').value = '';
+      document.getElementById('proxy-modal').style.display = 'flex';
+    }
+
+    function closeProxyModal() {
+      document.getElementById('proxy-modal').style.display = 'none';
+    }
+
+    function handleSetProxy() {
+      if (!currentUser) return;
+      const auction = auctions.find(a => a.id === activeAuctionId);
+      if (!auction) return;
+      
+      const amount = Number(document.getElementById('proxy-amount-input').value);
+      if (isNaN(amount) || amount <= auction.currentPrice) {
+        notify(`เพดานราคาตั้งล่วงหน้าต้องมากกว่าราคาปัจจุบัน`, 'error');
+        return;
+      }
+
+      const auctionIndex = auctions.findIndex(a => a.id === activeAuctionId);
+      auctions[auctionIndex].proxyBids[currentUser.id] = amount;
+      
+      closeProxyModal();
+      notify(`ตั้งระบบประมูลอัตโนมัติที่เพดาน ${formatCurrency(amount)} แล้ว`, 'success');
+      
+      if (amount > auction.currentPrice && auction.winnerId !== currentUser.id) {
+        handleQuickBid();
+      }
+      
+      renderDetailPage();
+    }
+
+    // ==================== SYSTEM OVERRIDES ====================
+    function setupSystemOverrides() {
+      const auction = auctions.find(a => a.id === activeAuctionId);
+      if (!auction) return;
+
+      const forceBtn = document.getElementById('force-rival-btn');
+      const toggleBtn = document.getElementById('toggle-bot-btn');
+      const botStatus = document.getElementById('bot-status');
+
+      forceBtn.disabled = auction.status !== 'ACTIVE' || isAutoBotEnabled;
+      forceBtn.onclick = () => {
+        const minIncrement = getIncrement(auction.currentPrice);
+        const nextBid = auction.winnerId ? auction.currentPrice + minIncrement : auction.startPrice;
+        processBid(activeAuctionId, RIVAL_USER.id, nextBid);
+        notify('มีคนเกทับราคาคุณแล้ว!', 'warning');
+      };
+
+      toggleBtn.disabled = auction.status !== 'ACTIVE';
+      toggleBtn.className = `w-full font-bold py-2 text-xs uppercase tracking-widest transition-colors border ${
+        isAutoBotEnabled 
+          ? 'bg-[#33FF00] text-[#1A1A1A] border-[#33FF00]' 
+          : 'bg-transparent text-[#33FF00] hover:bg-[#33FF00]/20 border-[#33FF00]'
+      }`;
+      toggleBtn.textContent = isAutoBotEnabled ? '> Disable Botnet' : '> Enable Botnet (3.5s)';
+      toggleBtn.onclick = toggleBot;
+
+      botStatus.style.display = isAutoBotEnabled ? 'flex' : 'none';
+    }
+
+    function toggleBot() {
+      isAutoBotEnabled = !isAutoBotEnabled;
+      
+      if (isAutoBotEnabled) {
+        botInterval = setInterval(() => {
+          const auction = auctions.find(a => a.id === activeAuctionId);
+          if (auction && auction.status === 'ACTIVE' && auction.winnerId !== RIVAL_USER.id && currentUser?.id !== RIVAL_USER.id) {
+            const nextBid = auction.currentPrice + getIncrement(auction.currentPrice);
+            processBid(activeAuctionId, RIVAL_USER.id, nextBid, true);
+            notify('มีคนเกทับราคาคุณแล้ว!', 'warning');
+          }
+        }, 3500);
+      } else {
+        clearInterval(botInterval);
+      }
+      
+      setupSystemOverrides();
+    }
+
+    // ==================== CREATE PRODUCT ====================
+    function renderCategorySelect() {
+      const select = document.getElementById('category-select');
+      select.innerHTML = CATEGORIES.filter(c => c.id !== 'ALL').map(c => 
+        `<option value="${c.id}">${c.name}</option>`
+      ).join('');
+    }
+
+    function handleImageUpload(e) {
+      const file = e.target.files?.[0];
+      if (file) {
+        if (!file.type.startsWith('image/')) {
+          notify('กรุณาอัพโหลดไฟล์รูปภาพเท่านั้น', 'error');
+          return;
+        }
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          newProductPreview = reader.result;
+          showImagePreview(newProductPreview);
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function handleImageUrlInput(e) {
+      const url = e.target.value;
+      if (url) {
+        newProductPreview = url;
+        showImagePreview(url);
+      }
+    }
+
+    function showImagePreview(src) {
+      document.getElementById('image-preview').src = src;
+      document.getElementById('image-preview-container').style.display = 'block';
+    }
+
+    function clearImagePreview() {
+      newProductPreview = '';
+      document.getElementById('image-preview-container').style.display = 'none';
+      document.getElementById('image-url-input').value = '';
+      document.getElementById('image-file-input').value = '';
+    }
+
+    function handleCreateAuction(e) {
+      e.preventDefault();
+      
+      const name = document.getElementById('product-name-input').value.trim();
+      const description = document.getElementById('description-input').value.trim();
+      const startPrice = Number(document.getElementById('start-price-input').value);
+      const category = document.getElementById('category-select').value;
+      const duration = Number(document.getElementById('duration-select').value);
+      
+      if (!name || !startPrice || !newProductPreview) {
+        notify('กรุณากรอกข้อมูลและใส่รูปภาพให้ครบถ้วน', 'warning');
+        return;
+      }
+      
+      const newAuction = {
+        id: generateId(),
+        name,
+        description,
+        category,
+        startPrice,
+        currentPrice: startPrice,
+        images: newProductPreview,
+        winnerId: null,
+        status: 'ACTIVE',
+        timeLeft: duration * 3600,
+        bids: [],
+        proxyBids: {}
+      };
+
+      auctions.unshift(newAuction);
+      
+      // Reset form
+      document.getElementById('product-name-input').value = '';
+      document.getElementById('description-input').value = '';
+      document.getElementById('start-price-input').value = '';
+      document.getElementById('duration-select').value = '24';
+      clearImagePreview();
+      
+      navigateTo('BROWSE');
+      notify('ลงประกาศสินค้าสำเร็จ!', 'success');
+    }
+
+    // ==================== TIMER SYSTEM ====================
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        let hasChanges = false;
+        
+        auctions = auctions.map(auction => {
+          if (auction.status !== 'ACTIVE') return auction;
+          if (auction.timeLeft <= 1) {
+            hasChanges = true;
+            return { ...auction, timeLeft: 0, status: 'CLOSED' };
+          }
+          hasChanges = true;
+          return { ...auction, timeLeft: auction.timeLeft - 1 };
+        });
+        
+        if (hasChanges) {
+          if (currentView === 'BROWSE') {
+            renderAuctionsGrid();
+          } else if (currentView === 'DETAIL') {
+            updateDetailTimer();
+            const auction = auctions.find(a => a.id === activeAuctionId);
+            if (auction && auction.status === 'CLOSED') {
+              renderDetailPage();
+            }
+          }
+        }
+      }, 1000);
+    }
+
+    // ==================== INITIALIZATION ====================
+    function init() {
+      // Generate random ticket number
+      document.getElementById('ticket-number').textContent = `No. ${Math.floor(Math.random() * 9000) + 1000} — Admittance for One`;
+      
+      // Set default role
+      setRegisterRole('BIDDER');
+      
+      // Render category filters
+      renderCategoryFilters();
+      
+      // Render category select for create page
+      renderCategorySelect();
+      
+      // Event listeners
+      document.getElementById('register-form').addEventListener('submit', handleRegister);
+      document.getElementById('create-form').addEventListener('submit', handleCreateAuction);
+      document.getElementById('image-file-input').addEventListener('change', handleImageUpload);
+      document.getElementById('image-url-input').addEventListener('input', handleImageUrlInput);
+      
+      // Start timer
+      startTimer();
+      
+      // Show register page
+      navigateTo('REGISTER');
+    }
+
+    // Run initialization when DOM is ready
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
